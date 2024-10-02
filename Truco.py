@@ -1,6 +1,7 @@
 """"Este proyecto va a ser un intento de recrear el juego Argentino Truco"""
 
 import random
+import time
 
 def generarCartas(Mazo1, Mazo2):            #Genera las cartas de cada jugador sin que se repitan
     largo=0
@@ -36,7 +37,7 @@ def jugar(mano,ManoJugador, ManoNPC,Arranca,puntajeJugador,puntajeNPC,ganadosJug
                     eleccion=random.choice(["S", "N"])
                     if eleccion=="S":
                         print("El NPC🤖 aceptó el envido.")
-                        puntajeJugador,puntajeNPC=envido(ManoJugador,ManoNPC,puntajeJugador,puntajeNPC,Arranca)
+                        puntajeJugador,puntajeNPC=envidoFunc(ManoJugador,ManoNPC,puntajeJugador,puntajeNPC,Arranca)
                     else:
                         print("El NPC🤖 NO acepto el envido.")
             carta = elegirCarta(ManoJugador)
@@ -49,7 +50,7 @@ def jugar(mano,ManoJugador, ManoNPC,Arranca,puntajeJugador,puntajeNPC,ganadosJug
                 if envido == "S":
                     eleccion=(input("El NPC🤖 cantó envido, ¿Quieres aceptar? (S/N):"))
                     if eleccion=="S":
-                        puntajeJugador,puntajeNPC=envido(ManoJugador,ManoNPC,puntajeJugador,puntajeNPC,Arranca)
+                        puntajeJugador,puntajeNPC=envidoFunc(ManoJugador,ManoNPC,puntajeJugador,puntajeNPC,Arranca)
             cartaNPC = random.choice([i for i in range(len(ManoNPC["Numero"]))])
             print("El NPC🤖 jugó la carta:", ManoNPC["Numero"][cartaNPC-1], ManoNPC["Palo"][cartaNPC-1])
             return ManoJugador, ManoNPC,puntajeJugador,puntajeNPC,envido,cartaNPC
@@ -139,7 +140,7 @@ def calcularEnvido(Mano):
     
     return max_envido
 
-def envido(ManoJugador, ManoNPC,puntajeJugador,puntajeNPC,arranca):
+def envidoFunc(ManoJugador, ManoNPC,puntajeJugador,puntajeNPC,arranca):
     envidoJugador = calcularEnvido(ManoJugador)
     envidoNPC = calcularEnvido(ManoNPC)
     print(f"\nPuntos de envido - Jugador: {envidoJugador}, NPC🤖: {envidoNPC}")
@@ -173,6 +174,7 @@ def main():
             ganadosJugador=0
             ganadosNPC=0
             parda=False
+            mano=1
 
             ManoJugador=generarCartas(ManoJugador, ManoNPC)
             ManoNPC=generarCartas(ManoNPC, ManoJugador)
