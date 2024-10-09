@@ -1,10 +1,10 @@
-""""Este proyecto va a ser un intento de recrear el juego Argentino Truco"""
+"""Truco"""
 
 import random
 import time
 
 # Función para imprimir texto lentamente
-def imprimir_lento(texto, velocidad=0.02):
+def imprimir_lento(texto, velocidad=0.015):
     for char in texto:
         print(char, end='', flush=True)
         time.sleep(velocidad)
@@ -33,7 +33,8 @@ def generarCartas(Mazo1, Mazo2):  # Genera las cartas de cada jugador sin que se
             largo += 1
     return Mazo1
 
-def jugar(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, ganadosJugador, ganadosNPC, parda):
+def jugar(Datos):
+    mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, ganadosJugador, ganadosNPC, parda = Datos
     terminado = False
     try:
         def turnoJugador(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, envido):
@@ -47,8 +48,8 @@ def jugar(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, ganad
                         puntajeJugador, puntajeNPC = envidoFunc(ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, Arranca)
                     else:
                         imprimir_lento("El NPC🤖 NO acepto el envido.")
-            carta = elegirCarta(ManoJugador)
-            imprimir_lento(f"\nJugaste la carta: {ManoJugador['Numero'][carta - 1]} {ManoJugador['Palo'][carta - 1]}")
+            carta = elegirCarta(ManoJugador) - 1  # Adjusted to be 0-based directly
+            imprimir_lento(f"\nJugaste la carta: {ManoJugador['Numero'][carta]} {ManoJugador['Palo'][carta]}")
             return ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, envido, carta
 
         def turnoNPC(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, envido):
@@ -59,8 +60,8 @@ def jugar(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, ganad
                     eleccion = input()
                     if eleccion == "S":
                         puntajeJugador, puntajeNPC = envidoFunc(ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, Arranca)
-            cartaNPC = random.choice([i for i in range(len(ManoNPC["Numero"]))])
-            imprimir_lento(f"El NPC🤖 jugó la carta: {ManoNPC['Numero'][cartaNPC - 1]} {ManoNPC['Palo'][cartaNPC - 1]}")
+            cartaNPC = random.choice([i for i in range(len(ManoNPC["Numero"]))])  # Already 0-based
+            imprimir_lento(f"El NPC🤖 jugó la carta: {ManoNPC['Numero'][cartaNPC]} {ManoNPC['Palo'][cartaNPC]}")
             return ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, envido, cartaNPC
 
         envido = "N"
@@ -72,41 +73,43 @@ def jugar(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, ganad
             ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, envido, cartaNPC = turnoNPC(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, envido)
         else:  # Turno NPC primero
             imprimir_lento("\nTurno del NPC🤖")
-            ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, envido, carta = turnoNPC(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, envido)
+            ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, envido, cartaNPC = turnoNPC(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, envido)
             imprimir_lento("\nTurno del Jugador")
-            ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, envido, cartaNPC = turnoJugador(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, envido)
+            ManoJugador, ManoNPC, puntajeJugador, puntajeNPC, envido, carta = turnoJugador(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, envido)
 
-        valorJugador = valorCarta({"Numero": ManoJugador["Numero"][carta - 1], "Palo": ManoJugador["Palo"][carta - 1]})
-        valorNPC = valorCarta({"Numero": ManoNPC["Numero"][cartaNPC - 1], "Palo": ManoNPC["Palo"][cartaNPC - 1]})
+        valorJugador = valorCarta({"Numero": ManoJugador["Numero"][carta], "Palo": ManoJugador["Palo"][carta]})
+        valorNPC = valorCarta({"Numero": ManoNPC["Numero"][cartaNPC], "Palo": ManoNPC["Palo"][cartaNPC]})
 
+        print(f"\nValor Jugador: {valorJugador}, Valor NPC🤖: {valorNPC}")
         if valorJugador > valorNPC:
-            imprimir_lento("El Jugador gana la ronda\n")
+            imprimir_lento("\nEl Jugador gana la ronda\n")
             ganadosJugador += 1
             Arranca = True
         elif valorJugador < valorNPC:
-            imprimir_lento("El NPC🤖 gana la ronda\n")
+            imprimir_lento("\nEl NPC🤖 gana la ronda\n")
             ganadosNPC += 1
             Arranca = False
         else:
-            imprimir_lento("Se empardó la ronda\n")
+            imprimir_lento("\nSe empardó la ronda\n")
             parda = True
             ganadosJugador += 1
             ganadosNPC += 1
 
         if ganadosJugador == 2:
-            imprimir_lento("El Jugador gana la mano\n")
+            imprimir_lento("\nEl Jugador gana la mano\n")
             puntajeJugador += 1
             terminado = True
 
         elif ganadosNPC == 2:
-            imprimir_lento("El NPC🤖 gana la mano\n")
+            imprimir_lento("\nEl NPC🤖 gana la mano\n")
             puntajeNPC += 1
             terminado = True
 
-        ManoJugador["Numero"].pop(carta - 1)
-        ManoJugador["Palo"].pop(carta - 1)
-        ManoNPC["Numero"].pop(cartaNPC - 1)
-        ManoNPC["Palo"].pop(cartaNPC - 1)
+        # Remove the played cards (use carta and cartaNPC which are now 0-based)
+        ManoJugador["Numero"].pop(carta)
+        ManoJugador["Palo"].pop(carta)
+        ManoNPC["Numero"].pop(cartaNPC)
+        ManoNPC["Palo"].pop(cartaNPC)
 
         return puntajeJugador, puntajeNPC, ganadosJugador, ganadosNPC, Arranca, parda, terminado
 
@@ -120,7 +123,7 @@ def jugar(mano, ManoJugador, ManoNPC, Arranca, puntajeJugador, puntajeNPC, ganad
         imprimir_lento("Ingresa bien los valores plis.")
 
 def elegirCarta(Cartas):
-    imprimir_lento(f"Ingrese la carta de quieres jugar 1 -{len(Cartas["Numero"])}")
+    imprimir_lento(f"Ingrese la carta de quieres jugar 1 - {len(Cartas["Numero"])}")
     carta=int(input())
     while carta<1 or carta>len(Cartas["Numero"]):
         imprimir_lento("Carta invalida, ingrese una carta:")
@@ -263,8 +266,8 @@ def main():
             imprimir_lento("\nMano del NPC🤖:")
             for n in range(lenght):
                 imprimir_lento(f"{ManoNPC["Numero"][n]}{ManoNPC["Palo"][n]}")       
-
-        puntajeJugador, puntajeNPC,ganadosJugador,ganadosNPC,arrancaJugador,parda,terminado=jugar(mano,ManoJugador, ManoNPC,arrancaJugador,puntajeJugador,puntajeNPC,ganadosJugador,ganadosNPC,parda)
+        datos=(mano,ManoJugador, ManoNPC,arrancaJugador,puntajeJugador,puntajeNPC,ganadosJugador,ganadosNPC,parda)
+        puntajeJugador, puntajeNPC,ganadosJugador,ganadosNPC,arrancaJugador,parda,terminado=jugar(datos)
         mano+=1
 
 if __name__ == "__main__":
